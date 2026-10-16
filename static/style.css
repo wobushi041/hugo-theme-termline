@@ -90,11 +90,11 @@ html[data-theme="light"] {
 /* 全局基础：页面基础前景与背景及防挤压槽位 */
 html {
   scrollbar-gutter: stable;
+  overflow-x: hidden;
 }
 
-html,
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -1700,9 +1700,12 @@ body .content {
 /* 响应式：移动端整体覆盖 */
 @media (max-width: 684px) {
   /* 响应式：关闭横向溢出 */
-  html,
-  body {
+  html {
     overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: clip;
   }
 
   /* 响应式：缩小头部控件间距 */
