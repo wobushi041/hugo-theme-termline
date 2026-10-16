@@ -1,0 +1,32 @@
+name: Publish Theme Branch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'themes/termline/**'
+      - '.github/workflows/publish-theme.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-theme-branch
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    if: github.repository == 'wobushi041/hugo-theme-termline'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Publish themes/termline as branch root
+        shell: bash
+        run: |
+          set -euo pipefail
+          split_sha="$(git subtree split --prefix=themes/termline HEAD)"
+          git push origin "${split_sha}:refs/heads/theme"

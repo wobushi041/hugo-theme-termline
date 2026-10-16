@@ -1,0 +1,29 @@
+<header class="header">
+  <div class="header__inner">
+    <div class="header__logo">{{ partial "logo.html" . }}</div>
+
+    <div class="header__controls">
+      <button class="header-icon-button" type="button" aria-label="开启粒子效果" title="开启粒子效果" aria-pressed="false" data-pixel-snow-toggle>
+        <span class="header-icon-button__icon"> {{ partial "icons/snowflake.html" . }} </span>
+      </button>
+
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="深色模式" title="深色模式" aria-pressed="true">
+        <span class="theme-toggle__icon theme-toggle__icon--light">
+          {{ partial "icons/light.html" . }}
+        </span>
+        <span class="theme-toggle__icon theme-toggle__icon--dark">
+          {{ partial "icons/dark.html" . }}
+        </span>
+      </button>
+
+      <button class="header-icon-button" type="button" aria-label="搜索" data-search-open>
+        <span class="header-icon-button__icon"> {{ partial "icons/search.html" . }} </span>
+      </button>
+
+      {{ if and $.Site.Params.showLanguageSelector (len $.Site.Home.AllTranslations) }} {{ partial
+      "language-menu.html" . }} {{ end }}
+    </div>
+  </div>
+
+  {{ if len $.Site.Menus }} {{ partial "menu.html" . }} {{ end }}
+</header>

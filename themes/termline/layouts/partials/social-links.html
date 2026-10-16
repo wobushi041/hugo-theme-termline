@@ -1,0 +1,34 @@
+{{ $linksPage := site.GetPage "/links" }} {{ $class := .class | default "social-links" }} {{
+$ariaLabel := .ariaLabel | default "Social links" }} {{ $dock := .dock | default false }} {{ with
+$linksPage }} {{ $links := .Params.links | default (slice) }} {{ if gt (len $links) 0 }}
+<div
+  class="{{ $class }}{{ if $dock }} {{ $class }}--dock{{ end }}"
+  aria-label="{{ $ariaLabel }}"
+  {{
+  if
+  $dock
+  }}data-social-dock{{
+  end
+  }}
+>
+  {{ range $links }} {{ $label := .label | default .id }} {{ $icon := .icon | default .id }} {{
+  $external := .external | default false }} {{ $iconPartial := printf "icons/%s.html" $icon }}
+  <a
+    class="{{ $class }}__item"
+    href="{{ .url }}"
+    aria-label="{{ $label }}"
+    title="{{ $label }}"
+    {{
+    if
+    $external
+    }}target="_blank"
+    rel="noreferrer"
+    {{
+    end
+    }}
+  >
+    <span class="{{ $class }}__icon"> {{ partial $iconPartial . }} </span>
+  </a>
+  {{ end }}
+</div>
+{{ end }} {{ end }}

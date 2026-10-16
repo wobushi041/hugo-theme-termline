@@ -1,0 +1,23 @@
+name: Theme Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: '0.163.3'
+          extended: true
+      - name: Verify complete theme
+        shell: pwsh
+        run: ./scripts/verify-theme.ps1

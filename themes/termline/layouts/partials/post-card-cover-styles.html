@@ -1,0 +1,47 @@
+<style>
+  .post.on-list .post-card-header {
+    margin-bottom: 0;
+    padding-bottom: 15px;
+    border-bottom: 3px dotted var(--accent);
+  }
+
+  .post.on-list .post-title {
+    margin-bottom: 0 !important;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .post-card-cover {
+    margin: 0 0 18px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+    border-radius: 0 0 12px 12px;
+  }
+
+  .post-card-cover__image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 4.5;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  @media (max-width: 684px) {
+    .post.on-list .post-card-header {
+      margin-bottom: 0;
+      padding-bottom: 14px;
+    }
+
+    .post-card-cover {
+      margin: 0 0 16px;
+    }
+
+    .post-card-cover__image {
+      aspect-ratio: 16 / 4.5;
+    }
+  }
+</style>

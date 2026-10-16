@@ -1,0 +1,316 @@
+<!--
+To add an extended footer section, please create
+`layouts/partials/extended_footer.html` in your Hugo directory.
+-->
+<script src="{{ "vendor/glightbox/glightbox.min.js" | relURL }}"></script>
+<script>
+  (function () {
+    if (typeof GLightbox !== "function") {
+      return;
+    }
+
+    var lightbox = GLightbox({
+      selector: ".post-content .glightbox",
+      touchNavigation: true,
+      touchFollowAxis: true,
+      loop: true,
+      zoomable: false,
+      draggable: false,
+      closeButton: false,
+      closeOnOutsideClick: true
+    });
+
+    setupLightboxZoomControls(lightbox);
+
+    function setupLightboxZoomControls(instance) {
+      var scale = 1;
+      var tx = 0;
+      var ty = 0;
+      var isDragging = false;
+      var startX = 0;
+      var startY = 0;
+      var activeMedia = null;
+      var controls = null;
+
+      function getActiveMedia() {
+        var currentSlide = document.querySelector("#glightbox-body .gslide.current");
+        if (!currentSlide) return null;
+        var media = currentSlide.querySelector(".gslide-media");
+        if (media && !media.classList.contains("media-viewport")) {
+          media.classList.add("media-viewport");
+        }
+        return media;
+      }
+
+      function isReducedMotion() {
+        return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      }
+
+      function applyTransform(withTransition) {
+        if (!activeMedia) activeMedia = getActiveMedia();
+        if (!activeMedia) return;
+
+        var body = document.getElementById("glightbox-body");
+        var useTransition = withTransition && !isReducedMotion();
+        activeMedia.style.transition = useTransition ? "transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)" : "none";
+        activeMedia.style.transform = "translate(" + tx + "px, " + ty + "px) scale(" + scale + ")";
+
+        if (body) {
+          if (scale > 1.05 || scale < 0.95 || tx !== 0 || ty !== 0) {
+            body.classList.add("media-is-zoomed");
+          } else {
+            body.classList.remove("media-is-zoomed");
+          }
+        }
+      }
+
+      function zoom(delta) {
+        var next = Math.min(Math.max(scale + delta, 0.4), 3.5);
+        scale = parseFloat(next.toFixed(2));
+        if (scale <= 1.02 && scale >= 0.98) {
+          scale = 1;
+          tx = 0;
+          ty = 0;
+        }
+        applyTransform(true);
+      }
+
+      function resetZoom() {
+        scale = 1;
+        tx = 0;
+        ty = 0;
+        applyTransform(true);
+      }
+
+      function toggleFullscreen() {
+        var body = document.getElementById("glightbox-body");
+        if (!body) return;
+
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          if (body.requestFullscreen) {
+            body.requestFullscreen();
+          } else if (body.webkitRequestFullscreen) {
+            body.webkitRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
+        }
+      }
+
+      function ensureControls() {
+        var body = document.getElementById("glightbox-body");
+        if (!body) return;
+
+        var targetContainer = body.querySelector(".gcontainer") || body;
+
+        if (!controls || !targetContainer.contains(controls)) {
+          controls = document.createElement("div");
+          controls.className = "media-controls glightbox-controls";
+          controls.setAttribute("aria-label", "图片缩放工具栏");
+          controls.innerHTML =
+            '<button class="media-ctrl-btn" data-action="zoom-in" type="button" title="放大 (+)" aria-label="放大">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>' +
+            '</button>' +
+            '<button class="media-ctrl-btn" data-action="zoom-out" type="button" title="缩小 (-)" aria-label="缩小">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>' +
+            '</button>' +
+            '<button class="media-ctrl-btn" data-action="reset" type="button" title="重置 (双击图片)" aria-label="重置">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>' +
+            '</button>' +
+            '<button class="media-ctrl-btn" data-action="fullscreen" type="button" title="全屏查看" aria-label="全屏查看">' +
+              '<svg class="icon-expand" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>' +
+              '<svg class="icon-compress" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="10" y1="14" x2="3" y2="21"></line></svg>' +
+            '</button>';
+
+          controls.addEventListener("click", function (e) {
+            var btn = e.target.closest(".media-ctrl-btn");
+            if (!btn) return;
+            e.stopPropagation();
+
+            var action = btn.getAttribute("data-action");
+            if (action === "zoom-in") {
+              zoom(0.25);
+            } else if (action === "zoom-out") {
+              zoom(-0.25);
+            } else if (action === "reset") {
+              resetZoom();
+            } else if (action === "fullscreen") {
+              toggleFullscreen();
+            }
+          });
+
+          targetContainer.appendChild(controls);
+        }
+      }
+
+      // GLightbox 生命周期挂载
+      instance.on("open", function () {
+        setTimeout(function () {
+          ensureControls();
+          activeMedia = getActiveMedia();
+          resetZoom();
+        }, 80);
+      });
+
+      instance.on("slide_after_load", function () {
+        activeMedia = getActiveMedia();
+        resetZoom();
+      });
+
+      instance.on("close", function () {
+        if (controls) {
+          controls.style.display = "none";
+          controls.remove();
+          controls = null;
+        }
+        resetZoom();
+        var body = document.getElementById("glightbox-body");
+        if (body) {
+          body.classList.remove("media-is-zoomed", "media-is-dragging");
+        }
+        setTimeout(function () {
+          window.dispatchEvent(new Event("resize"));
+        }, 120);
+      });
+
+      // 统一 Pointer Events 交互：未缩放让渡给 GLightbox 原生切图/退出手势，放大态接管拖拽，随时支持双指捏合缩放 (Pinch-to-zoom)
+      var activePointers = new Map();
+      var initialPinchDist = null;
+      var initialPinchScale = 1;
+
+      document.addEventListener("pointerdown", function (e) {
+        var body = document.getElementById("glightbox-body");
+        if (!body || (!body.classList.contains("glightbox-open") && !document.body.classList.contains("glightbox-open"))) {
+          return;
+        }
+
+        var targetSlide = e.target.closest("#glightbox-body .gslide.current");
+        if (!targetSlide) return;
+        if (e.target.closest(".media-controls, .gbtn")) return;
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+
+        activeMedia = getActiveMedia();
+        if (!activeMedia) return;
+
+        activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (activePointers.size === 1) {
+          // 图片未缩放且无位移时，完全不拦截单指手势，让渡给 GLightbox 原生 touchNavigation 滑屏切图
+          if (scale <= 1 && tx === 0 && ty === 0) {
+            isDragging = false;
+            return;
+          }
+          isDragging = true;
+          startX = e.clientX - tx;
+          startY = e.clientY - ty;
+          activeMedia.style.transition = "none";
+          body.classList.add("media-is-dragging");
+          e.preventDefault();
+        } else if (activePointers.size === 2) {
+          isDragging = false;
+          body.classList.remove("media-is-dragging");
+          var pts = Array.from(activePointers.values());
+          initialPinchDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+          initialPinchScale = scale;
+          e.preventDefault();
+        }
+      });
+
+      window.addEventListener("pointermove", function (e) {
+        if (!activePointers.has(e.pointerId)) return;
+        activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (activePointers.size === 2 && initialPinchDist && activeMedia) {
+          var pts = Array.from(activePointers.values());
+          var currentDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+          if (currentDist > 0) {
+            var nextScale = Math.min(Math.max(initialPinchScale * (currentDist / initialPinchDist), 0.4), 3.5);
+            scale = parseFloat(nextScale.toFixed(2));
+            applyTransform(false);
+          }
+          e.preventDefault();
+        } else if (isDragging && activePointers.size === 1 && activeMedia) {
+          tx = e.clientX - startX;
+          ty = e.clientY - startY;
+          activeMedia.style.transform = "translate(" + tx + "px, " + ty + "px) scale(" + scale + ")";
+          e.preventDefault();
+        }
+      });
+
+      function handlePointerEnd(e) {
+        activePointers.delete(e.pointerId);
+        var body = document.getElementById("glightbox-body");
+
+        if (activePointers.size === 0) {
+          isDragging = false;
+          initialPinchDist = null;
+          if (body) body.classList.remove("media-is-dragging");
+        } else if (activePointers.size === 1) {
+          initialPinchDist = null;
+          if (scale > 1 || tx !== 0 || ty !== 0) {
+            var remaining = Array.from(activePointers.values())[0];
+            startX = remaining.x - tx;
+            startY = remaining.y - ty;
+            isDragging = true;
+          } else {
+            isDragging = false;
+          }
+        }
+      }
+
+      window.addEventListener("pointerup", handlePointerEnd);
+      window.addEventListener("pointercancel", handlePointerEnd);
+
+      // 快捷滚轮缩放 (按住 Ctrl / Meta 键滑动滚轮)
+      document.addEventListener("wheel", function (e) {
+        var body = document.getElementById("glightbox-body");
+        if (!body || !document.body.classList.contains("glightbox-open")) return;
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          var delta = e.deltaY < 0 ? 0.15 : -0.15;
+          zoom(delta);
+        }
+      }, { passive: false });
+
+      // 双击图片重置
+      document.addEventListener("dblclick", function (e) {
+        var body = document.getElementById("glightbox-body");
+        if (!body || !document.body.classList.contains("glightbox-open")) return;
+        if (e.target.closest(".media-controls, .gbtn")) return;
+        if (e.target.closest("#glightbox-body .gslide-media")) {
+          resetZoom();
+        }
+      });
+
+      // 全屏状态改变时切换 expand / compress 图标并同步页面布局
+      function handleFullscreenState() {
+        var isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        var expandIcon = document.querySelector(".glightbox-controls .icon-expand");
+        var compressIcon = document.querySelector(".glightbox-controls .icon-compress");
+        if (expandIcon && compressIcon) {
+          if (isFs) {
+            expandIcon.style.display = "none";
+            compressIcon.style.display = "inline-block";
+          } else {
+            expandIcon.style.display = "inline-block";
+            compressIcon.style.display = "none";
+          }
+        }
+        setTimeout(function () {
+          window.dispatchEvent(new Event("resize"));
+        }, 100);
+      }
+
+      document.addEventListener("fullscreenchange", handleFullscreenState);
+      document.addEventListener("webkitfullscreenchange", handleFullscreenState);
+    }
+  })();
+</script>
+
+{{ if .Page.Store.Get "hasMermaid" }}
+{{ partial "mermaid.html" . }}
+{{ end }}

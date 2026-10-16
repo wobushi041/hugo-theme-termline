@@ -1,0 +1,147 @@
+baseURL = "http://localhost:1313/"
+title = "termline"
+theme = "termline"
+defaultContentLanguage = "zh-cn"
+pagination.pagerSize = 10
+
+[outputs]
+home = ["HTML", "RSS", "JSON"]
+
+[markup.highlight]
+noClasses = true
+lineNos = true
+lineNumbersInTable = false
+
+[markup.goldmark.renderer]
+unsafe = true
+
+[markup.goldmark.extensions.extras.alert]
+enable = true
+
+[params]
+contentTypeName = "posts"
+showMenuItems = 8
+fullWidthTheme = false
+centerTheme = true
+autoCover = true
+showLastUpdated = false
+
+[params.termline.footer]
+showPoweredBy = true
+owner = "termline"
+
+[params.termline.assets]
+favicon = ""
+faviconSvg = ""
+appleTouchIcon = ""
+defaultOgImage = ""
+
+[params.termline.beian]
+icpNumber = ""
+icpURL = "https://beian.miit.gov.cn/"
+policeNumber = ""
+policeURL = ""
+policeIcon = ""
+
+[languages]
+[languages.zh-cn]
+label = "简体中文"
+weight = 1
+
+[languages.zh-cn.params]
+subtitle = "极简、线条驱动的终端风格 Hugo 主题"
+menuMore = "更多"
+mobileMenuLabel = "菜单"
+readMore = "阅读更多"
+newerPosts = "上一页"
+olderPosts = "下一页"
+missingContentMessage = "页面不存在"
+missingBackButtonLabel = "返回首页"
+minuteReadingTime = "分钟阅读"
+words = "字"
+
+[languages.zh-cn.params.logo]
+logoText = "termline"
+logoHomeLink = "/"
+
+[languages.zh-cn.menu]
+[[languages.zh-cn.menu.main]]
+identifier = "home"
+name = "首页"
+url = "/"
+weight = 1
+
+[[languages.zh-cn.menu.main]]
+identifier = "archives"
+name = "归档"
+url = "/archives"
+weight = 2
+
+[[languages.zh-cn.menu.main]]
+identifier = "tags"
+name = "标签"
+url = "/tags"
+weight = 3
+
+[[languages.zh-cn.menu.main]]
+identifier = "journeys"
+name = "足迹"
+url = "/journeys"
+weight = 4
+
+[[languages.zh-cn.menu.main]]
+identifier = "about"
+name = "关于"
+url = "/about"
+weight = 5
+
+[languages.en]
+label = "English"
+weight = 2
+
+[languages.en.params]
+subtitle = "A minimal terminal theme for Hugo"
+menuMore = "More"
+mobileMenuLabel = "Menu"
+readMore = "Read more"
+newerPosts = "Newer posts"
+olderPosts = "Older posts"
+missingContentMessage = "Page not found"
+missingBackButtonLabel = "Back to home"
+minuteReadingTime = "min read"
+words = "words"
+
+[languages.en.params.logo]
+logoText = "termline"
+logoHomeLink = "/"
+
+[languages.en.menu]
+[[languages.en.menu.main]]
+identifier = "home"
+name = "Home"
+url = "/"
+weight = 1
+
+[[languages.en.menu.main]]
+identifier = "archives"
+name = "Archives"
+url = "/archives"
+weight = 2
+
+[[languages.en.menu.main]]
+identifier = "tags"
+name = "Tags"
+url = "/tags"
+weight = 3
+
+[[languages.en.menu.main]]
+identifier = "journeys"
+name = "Journeys"
+url = "/journeys"
+weight = 4
+
+[[languages.en.menu.main]]
+identifier = "about"
+name = "About"
+url = "/about"
+weight = 5

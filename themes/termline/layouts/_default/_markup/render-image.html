@@ -1,0 +1,17 @@
+{{- $destination := .Destination | safeURL -}}
+{{- $alt := .PlainText -}}
+{{- $title := .Title -}}
+{{- if .IsBlock -}}
+<figure>
+  <a class="glightbox" href="{{ $destination }}" data-gallery="post-images" data-type="image" data-zoomable="true" data-draggable="true"{{ with $title }} data-title="{{ . }}"{{ end }}>
+    <img src="{{ $destination }}" alt="{{ $alt }}"{{ with $title }} title="{{ . }}"{{ end }}>
+  </a>
+  {{- with $title }}
+  <figcaption>{{ . }}</figcaption>
+  {{- end }}
+</figure>
+{{- else -}}
+<a class="glightbox" href="{{ $destination }}" data-gallery="post-images" data-type="image" data-zoomable="true" data-draggable="true"{{ with $title }} data-title="{{ . }}"{{ end }}>
+  <img src="{{ $destination }}" alt="{{ $alt }}"{{ with $title }} title="{{ . }}"{{ end }}>
+</a>
+{{- end -}}

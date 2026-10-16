@@ -1,0 +1,302 @@
+<script src="{{ "vendor/mermaid/mermaid.min.js" | relURL }}"></script>
+<script>
+  (function () {
+    function getTheme() {
+      return document.documentElement.dataset.theme || (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    }
+
+    async function renderMermaidCharts() {
+      if (typeof mermaid === "undefined") {
+        return;
+      }
+
+      var isDark = getTheme() === "dark";
+      // 安全级别说明：
+      // - "loose"：允许图表使用自定义 HTML 样式标签与链接，适用于当前博主本人编写的受信任静态文章源码。
+      // - 若未来支持接收不可信的外部贡献、用户评论或第三方 UGC 内容，应切换为 "strict" 或 "antiscript" 以规避潜在的脚本注入风险。
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: isDark ? "dark" : "default",
+        securityLevel: "loose",
+        fontFamily: "inherit"
+      });
+
+      var wrappers = document.querySelectorAll(".mermaid-wrapper");
+      for (var i = 0; i < wrappers.length; i++) {
+        var wrapper = wrappers[i];
+        var template = wrapper.querySelector(".mermaid-source");
+        var target = wrapper.querySelector(".mermaid-diagram");
+        if (!template || !target) {
+          continue;
+        }
+
+        var code = template.content ? template.content.textContent.trim() : template.textContent.trim();
+        if (!code) {
+          continue;
+        }
+
+        var renderId = "mermaid-svg-" + i + "-" + Math.random().toString(36).substring(2, 9);
+        try {
+          var renderResult = await mermaid.render(renderId, code);
+          target.innerHTML = renderResult.svg;
+          if (typeof renderResult.bindFunctions === "function") {
+            renderResult.bindFunctions(target);
+          }
+          wrapper.classList.add("mermaid-rendered");
+        } catch (err) {
+          console.error("Mermaid rendering error:", err);
+          var fallback = target.querySelector(".mermaid-fallback");
+          if (!fallback) {
+            target.innerHTML = '<pre class="mermaid-fallback"><code>' + code + '</code></pre>';
+          }
+        }
+      }
+
+      setupMermaidInteractions();
+    }
+
+    function isReducedMotion() {
+      return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+
+    function setupMermaidInteractions() {
+      var wrappers = document.querySelectorAll(".mermaid-wrapper");
+      wrappers.forEach(function (wrapper) {
+        if (wrapper.dataset.interactiveInitialized === "true") {
+          return;
+        }
+        wrapper.dataset.interactiveInitialized = "true";
+
+        var container = wrapper.querySelector(".mermaid-container");
+        var viewport = wrapper.querySelector(".media-viewport");
+        if (!container || !viewport) {
+          return;
+        }
+
+        var scale = 1;
+        var translateX = 0;
+        var translateY = 0;
+        var isDragging = false;
+        var startX = 0;
+        var startY = 0;
+        var activePointers = new Map();
+        var initialPinchDist = null;
+        var initialPinchScale = 1;
+
+        function applyTransform(withTransition) {
+          var useTransition = withTransition && !isReducedMotion();
+          viewport.style.transition = useTransition ? "transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)" : "none";
+          viewport.style.transform = "translate(" + translateX + "px, " + translateY + "px) scale(" + scale + ")";
+          if (scale > 1.05 || scale < 0.95 || translateX !== 0 || translateY !== 0) {
+            wrapper.classList.add("media-is-zoomed");
+          } else {
+            wrapper.classList.remove("media-is-zoomed");
+          }
+        }
+
+        function zoom(delta) {
+          var next = Math.min(Math.max(scale + delta, 0.4), 3.5);
+          scale = parseFloat(next.toFixed(2));
+          if (scale <= 1.02 && scale >= 0.98) {
+            scale = 1;
+            translateX = 0;
+            translateY = 0;
+          }
+          applyTransform(true);
+        }
+
+        function resetZoom() {
+          scale = 1;
+          translateX = 0;
+          translateY = 0;
+          applyTransform(true);
+          if (container && container.scrollLeft !== 0) {
+            if (isReducedMotion()) {
+              container.scrollLeft = 0;
+            } else if (typeof container.scrollTo === "function") {
+              container.scrollTo({ left: 0, behavior: "smooth" });
+            } else {
+              container.scrollLeft = 0;
+            }
+          }
+        }
+
+        // 控制按钮事件
+        var controls = wrapper.querySelector(".media-controls");
+        if (controls) {
+          controls.addEventListener("click", function (e) {
+            var btn = e.target.closest(".media-ctrl-btn");
+            if (!btn) return;
+            e.stopPropagation();
+
+            var action = btn.getAttribute("data-action");
+            if (action === "zoom-in") {
+              zoom(0.25);
+            } else if (action === "zoom-out") {
+              zoom(-0.25);
+            } else if (action === "reset") {
+              resetZoom();
+            } else if (action === "fullscreen") {
+              toggleFullscreen(wrapper);
+            }
+          });
+        }
+
+        // 全屏切换处理
+        function toggleFullscreen(elem) {
+          if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (elem.requestFullscreen) {
+              elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+              elem.webkitRequestFullscreen();
+            }
+          } else {
+            if (document.exitFullscreen) {
+              document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+            }
+          }
+        }
+
+        // 统一 Pointer Events 交互：未缩放放行原生纵向滚动，放大后接管平移，支持双指捏合缩放 (Pinch-to-zoom)
+        viewport.addEventListener("pointerdown", function (e) {
+          if (e.pointerType === "mouse" && e.button !== 0) return;
+
+          activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+          if (activePointers.size === 1) {
+            // 图表未缩放且无位移时，完全不拦截单指操作，让渡给浏览器原生垂直滚动
+            if (scale <= 1 && translateX === 0 && translateY === 0) {
+              isDragging = false;
+              return;
+            }
+            try {
+              viewport.setPointerCapture(e.pointerId);
+            } catch (err) {}
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+            viewport.style.transition = "none";
+            wrapper.classList.add("media-is-dragging");
+            e.preventDefault();
+          } else if (activePointers.size === 2) {
+            // 双指操作立即接管捏合缩放
+            isDragging = false;
+            wrapper.classList.remove("media-is-dragging");
+            var pts = Array.from(activePointers.values());
+            initialPinchDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+            initialPinchScale = scale;
+            e.preventDefault();
+          }
+        });
+
+        viewport.addEventListener("pointermove", function (e) {
+          if (!activePointers.has(e.pointerId)) return;
+          activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+          if (activePointers.size === 2 && initialPinchDist) {
+            var pts = Array.from(activePointers.values());
+            var currentDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+            if (currentDist > 0) {
+              var nextScale = Math.min(Math.max(initialPinchScale * (currentDist / initialPinchDist), 0.4), 3.5);
+              scale = parseFloat(nextScale.toFixed(2));
+              applyTransform(false);
+            }
+            e.preventDefault();
+          } else if (isDragging && activePointers.size === 1) {
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            viewport.style.transform = "translate(" + translateX + "px, " + translateY + "px) scale(" + scale + ")";
+            e.preventDefault();
+          }
+        });
+
+        function handlePointerEnd(e) {
+          activePointers.delete(e.pointerId);
+          try {
+            viewport.releasePointerCapture(e.pointerId);
+          } catch (err) {}
+
+          if (activePointers.size === 0) {
+            isDragging = false;
+            initialPinchDist = null;
+            wrapper.classList.remove("media-is-dragging");
+          } else if (activePointers.size === 1) {
+            initialPinchDist = null;
+            if (scale > 1 || translateX !== 0 || translateY !== 0) {
+              var remaining = Array.from(activePointers.values())[0];
+              startX = remaining.x - translateX;
+              startY = remaining.y - translateY;
+              isDragging = true;
+            } else {
+              isDragging = false;
+            }
+          }
+        }
+
+        viewport.addEventListener("pointerup", handlePointerEnd);
+        viewport.addEventListener("pointercancel", handlePointerEnd);
+
+        // 滚轮缩放支持 (按住 Ctrl / Meta 键滚轮缩放，不干扰常规上下浏览滚动)
+        container.addEventListener("wheel", function (e) {
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            var delta = e.deltaY < 0 ? 0.15 : -0.15;
+            zoom(delta);
+          }
+        }, { passive: false });
+
+        // 双击图表快速重置
+        viewport.addEventListener("dblclick", function () {
+          resetZoom();
+        });
+      });
+    }
+
+    // 监听全屏图标切换
+    function handleFullscreenChange() {
+      var isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      document.querySelectorAll(".mermaid-wrapper").forEach(function (wrapper) {
+        var expandIcon = wrapper.querySelector(".icon-expand");
+        var compressIcon = wrapper.querySelector(".icon-compress");
+        if (!expandIcon || !compressIcon) return;
+
+        if (isFs && (document.fullscreenElement === wrapper || document.webkitFullscreenElement === wrapper)) {
+          wrapper.classList.add("mermaid-is-fullscreen");
+          expandIcon.style.display = "none";
+          compressIcon.style.display = "inline-block";
+        } else {
+          wrapper.classList.remove("mermaid-is-fullscreen");
+          expandIcon.style.display = "inline-block";
+          compressIcon.style.display = "none";
+        }
+      });
+    }
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+
+    window.renderMermaidCharts = renderMermaidCharts;
+
+    if (typeof mermaid !== "undefined") {
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", renderMermaidCharts);
+      } else {
+        renderMermaidCharts();
+      }
+    } else {
+      var cdnScript = document.createElement("script");
+      cdnScript.src = "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+      cdnScript.onload = function () {
+        renderMermaidCharts();
+      };
+      document.head.appendChild(cdnScript);
+    }
+
+    // 监听深浅主题无刷新切换
+    window.addEventListener("themechange", function () {
+      renderMermaidCharts();
+    });
+  })();
+</script>

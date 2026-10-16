@@ -1,0 +1,10 @@
+{{- $cover := partial "resolve-explicit-cover.html" . -}}
+{{- with $cover -}}
+  <div class="post-card-cover">
+    <img
+      src="{{ . }}"
+      class="post-card-cover__image"
+      alt="{{ $.Title | plainify | default " " }}"
+      title="{{ $.Params.CoverCredit | plainify | default "Cover Image" }}" />
+  </div>
+{{- end -}}

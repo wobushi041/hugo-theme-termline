@@ -1,0 +1,30 @@
+{{- $cover := "" -}}
+{{- $rawCover := "" -}}
+
+{{- with .Params.cover -}}
+  {{- $rawCover = trim (string .) " " -}}
+{{- end -}}
+
+{{- if $rawCover -}}
+  {{- with .Resources.GetMatch $rawCover -}}
+    {{- $cover = .RelPermalink -}}
+  {{- else -}}
+    {{- $coversPage := site.GetPage "/posts/covers" -}}
+    {{- $coversMatchPath := replaceRE "^covers/" "" $rawCover -}}
+    {{- with $coversPage -}}
+      {{- with .Resources.GetMatch $rawCover -}}
+        {{- $cover = .RelPermalink -}}
+      {{- else -}}
+        {{- with .Resources.GetMatch $coversMatchPath -}}
+          {{- $cover = .RelPermalink -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- if and (not $cover) (or (hasPrefix $rawCover "http://") (hasPrefix $rawCover "https://")) -}}
+      {{- $cover = $rawCover -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return $cover -}}
