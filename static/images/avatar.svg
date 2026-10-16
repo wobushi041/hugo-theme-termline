@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 100 100">
+  <style>
+    .stroke-main {
+      stroke: #09090b;
+    }
+    @media (prefers-color-scheme: dark) {
+      .stroke-main {
+        stroke: #ffffff;
+      }
+    }
+  </style>
+  <!-- '0' Capsule Loop -->
+  <rect class="stroke-main" x="7" y="22" width="23" height="56" rx="11.5" fill="none" stroke-width="9" />
+  <!-- '4' Architectural Wing -->
+  <path class="stroke-main" d="M 61 22 L 40 55 H 68 M 61 22 V 78" fill="none" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- '1' Terminal Cursor Pillar -->
+  <path class="stroke-main" d="M 84 43 V 78" fill="none" stroke-width="9" stroke-linecap="round" />
+</svg>

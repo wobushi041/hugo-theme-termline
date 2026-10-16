@@ -1,0 +1,14 @@
+[journeysProvinceView]
+other = "Provinces"
+
+[journeysCityView]
+other = "Cities"
+
+[journeysAll]
+other = "All"
+
+[journeysTitle]
+other = "Journeys"
+
+[journeysEmpty]
+other = "No journeys yet"

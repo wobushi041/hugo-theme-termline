@@ -1,0 +1,152 @@
+{{ define "main" }}
+  {{ $homeCity := .Params.homeCity | default "" }}
+  {{ $startDate := .Params.startDate | default "" }}
+  {{ $provinces := .Params.provinces | default (slice) }}
+  {{ $spots := .Params.spots | default (slice) }}
+  {{ $cityCoordinates := .Params.cityCoordinates | default dict }}
+
+  {{/* 统计指标 */}}
+  {{ $visitedProvinces := 0 }}
+  {{ $totalCities := 0 }}
+  {{ range $provinces }}
+    {{ if or (eq .status "resident") (eq .status "visited") }}
+      {{ $visitedProvinces = add $visitedProvinces 1 }}
+      {{ $totalCities = add $totalCities (len .cities) }}
+    {{ end }}
+  {{ end }}
+
+  {{ $allCities := slice }}
+  {{ range $provinces }}
+    {{ range .cities }}
+      {{ if not (in $allCities .) }}
+        {{ $allCities = $allCities | append . }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  {{ if reflect.IsSlice $cityCoordinates }}
+    {{ range $cityCoordinates }}
+      {{ if and (reflect.IsMap .) (not (in $allCities .name)) }}
+        {{ $allCities = $allCities | append .name }}
+      {{ end }}
+    {{ end }}
+  {{ else if reflect.IsMap $cityCoordinates }}
+    {{ range $k, $v := $cityCoordinates }}
+      {{ if not (in $allCities $k) }}
+        {{ $allCities = $allCities | append $k }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+
+  <article class="post journeys-page" data-journeys-page data-view="province">
+    <header class="journeys-hero">
+      <h1 class="post-title">{{ .Title }}</h1>
+      {{ with .Params.subtitle }}
+        <p class="journeys-subtitle">{{ . }}</p>
+      {{ end }}
+      {{ with .Content }}
+        <div class="journeys-lead post-content">
+          {{ . }}
+        </div>
+      {{ end }}
+    </header>
+
+    <section class="journeys-map-panel">
+      <div class="journeys-map-canvas-wrap">
+        {{/* 右上角悬浮看板 */}}
+        <div class="journeys-corner-panel">
+          <div class="journeys-view-toggle-group">
+            <button class="journeys-view-toggle is-active" data-view-mode="province" type="button">{{ i18n "journeysProvinceView" | default "省份" }}</button>
+            <button class="journeys-view-toggle" data-view-mode="city" type="button">{{ i18n "journeysCityView" | default "城市" }}</button>
+          </div>
+          <div class="journeys-corner-cards">
+            <article class="journeys-corner-card">
+              <p class="journeys-corner-card-title" data-corner-title>已点亮中国</p>
+              <div class="journeys-corner-card-value-line">
+                <strong data-corner-val>{{ $visitedProvinces }}</strong>
+                <span data-corner-sub>/ 34 省市</span>
+              </div>
+              <p class="journeys-corner-card-description" data-corner-desc>
+                {{ if or (gt $totalCities 0) $homeCity }}
+                  {{ if gt $totalCities 0 }}打卡 <b>{{ $totalCities }}</b> 个城市{{ end }}
+                  {{ if and (gt $totalCities 0) $homeCity }} · {{ end }}
+                  {{ with $homeCity }}常住 <b>{{ . }}</b>{{ end }}
+                {{ end }}
+              </p>
+            </article>
+          </div>
+        </div>
+
+        {{/* SVG 地图容器（包含省级与地级市双矢量底图） */}}
+        <div class="journeys-map-container" data-journeys-map>
+          <div class="footprint-svg-wrapper footprint-svg-province" data-svg-view="province">
+            {{ partial "footprints/china-svg.html" . }}
+          </div>
+          <div class="footprint-svg-wrapper footprint-svg-city" data-svg-view="city">
+            {{ partial "footprints/china-cities-svg.html" . }}
+          </div>
+          {{/* 浮动 Tooltip */}}
+          <div class="footprint-tooltip" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      {{/* 筛选胶囊栏 */}}
+      <div class="journeys-filter-stack">
+        <div class="journeys-filter-bar" data-filter-bar="province">
+          <button class="journeys-filter-chip is-active" data-filter-mode="province" data-filter-val="" type="button">
+            {{ i18n "journeysAll" | default "全部" }}{{ i18n "journeysProvinceView" | default "省份" }} <b>{{ len $spots }}</b>
+          </button>
+          {{ range $provinces }}
+            <button class="journeys-filter-chip" data-filter-mode="province" data-filter-val="{{ .name }}" data-code="{{ .code }}" data-status="{{ .status }}" type="button">
+              <span>{{ .shortName | default .name }}</span>
+              {{ with .count }}<b>{{ . }}</b>{{ end }}
+            </button>
+          {{ end }}
+        </div>
+
+        <div class="journeys-filter-bar" data-filter-bar="city" hidden>
+          <button class="journeys-filter-chip is-active" data-filter-mode="city" data-filter-val="" type="button">
+            {{ i18n "journeysAll" | default "全部" }}{{ i18n "journeysCityView" | default "城市" }} <b>{{ len $spots }}</b>
+          </button>
+          {{ range $allCities }}
+            <button class="journeys-filter-chip" data-filter-mode="city" data-filter-val="{{ . }}" type="button">
+              <span>{{ . }}</span>
+            </button>
+          {{ end }}
+        </div>
+      </div>
+    </section>
+
+    {{/* 下方足迹故事卡片流 */}}
+    <section class="journeys-list" aria-label="游记足迹卡片列表">
+      <h2 class="journeys-list-title">{{ i18n "journeysTitle" | default "旅程见闻" }}</h2>
+      {{ range $spots }}
+        <article class="journeys-card js-journeys-card" data-province="{{ .province }}" data-city="{{ .city }}">
+          <div class="journeys-card-head">
+            <h3 class="journeys-card-title">{{ .title }}</h3>
+            {{ with .postUrl }}
+              <a class="journeys-card-link" href="{{ . }}" target="_blank" rel="noopener noreferrer">阅读游记 →</a>
+            {{ end }}
+          </div>
+          <div class="journeys-card-meta">
+            <span class="journeys-card-tag">{{ .province }} · {{ .city }}</span>
+            <span class="journeys-card-date">{{ .date }}</span>
+          </div>
+          {{ with .address }}
+            <p class="journeys-card-address">📍 {{ . }}</p>
+          {{ end }}
+          <p class="journeys-card-body">{{ .content }}</p>
+        </article>
+      {{ end }}
+
+      <p class="journeys-empty-state" data-journeys-empty{{ if gt (len $spots) 0 }} hidden{{ end }}>
+        {{ i18n "journeysEmpty" | default "暂无旅程记录" }}
+      </p>
+    </section>
+  </article>
+
+  {{/* 注入前端交互数据 */}}
+  <script type="application/json" id="journeys-page-data">
+    {{ dict "provinces" $provinces "spots" $spots "cityCoords" $cityCoordinates "allCities" $allCities "homeCity" $homeCity "startDate" $startDate | jsonify }}
+  </script>
+  <script src="{{ "footprints-map.js" | relURL }}" defer></script>
+{{ end }}

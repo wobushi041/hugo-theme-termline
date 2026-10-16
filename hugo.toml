@@ -1,0 +1,29 @@
+[params]
+contentTypeName = "posts"
+showMenuItems = 6
+fullWidthTheme = false
+centerTheme = true
+autoCover = true
+showLastUpdated = false
+
+[params.termline.footer]
+showPoweredBy = true
+owner = ""
+
+[params.termline.assets]
+favicon = ""
+faviconSvg = ""
+appleTouchIcon = ""
+defaultOgImage = ""
+
+[params.termline.beian]
+icpNumber = ""
+icpURL = "https://beian.miit.gov.cn/"
+policeNumber = ""
+policeURL = ""
+policeIcon = ""
+
+[module]
+[module.hugoVersion]
+min = "0.163.3"
+extended = true

@@ -1,0 +1,91 @@
+{{ define "main" }}
+<article class="post">
+    <h1 class="post-title">
+        <a href="{{ .Permalink }}">{{ .Title | markdownify }}</a>
+    </h1>
+    <div class="post-meta">
+        {{- if .Date -}}
+        <time class="post-date">
+            {{- partial "post-date" . -}}
+            {{- if and $.Site.Params.showLastUpdated .Lastmod -}}
+            &nbsp;{{- partial "post-lastmod" . -}}
+            {{- end -}}
+        </time>
+        {{- end -}}
+        {{- with .Params.Author -}}
+        <span class="post-author">{{ . }}</span>
+        {{- end -}}
+        {{- if and (.Param "readingTime") (eq (.Param "readingTime") true) -}}
+        <span class="post-reading-time">{{ .ReadingTime }} {{ $.Site.Params.minuteReadingTime | default "min read" }} ({{ .WordCount }} {{ $.Site.Params.words | default "words" }})</span>
+        {{- end -}}
+        {{- if .Params.tags -}}
+        <span class="post-tags">
+            {{- range $index, $tag := .Params.tags -}}
+            {{- if gt $index 0 }} {{ end -}}
+            <a class="tag-chip tag-chip--{{ mod $index 6 }}" href="{{ (urlize (printf "tags/%s/" $tag)) | absLangURL }}">#{{ $tag }}</a>
+            {{- end -}}
+        </span>
+        {{- end -}}
+    </div>
+    {{ $showToc := (.Params.Toc | default .Site.Params.Toc) }}
+    <div class="post-layout{{ if $showToc }} has-toc{{ end }}">
+        <div class="post-main">
+            <div class="post-content">
+                {{- with .Content -}}
+                <div>
+                    {{ . | replaceRE "(<h[1-9] id=\"([^\"]+)\".+)(</h[1-9]+>)" `${1}<a href="#${2}" class="hanchor" aria-label="Anchor">#</a> ${3}` | safeHTML }}
+                </div>
+                {{- end -}}
+            </div>
+
+            {{ if eq .Type $.Site.Params.contentTypeName }}
+            {{ partial "posts_pagination.html" . }}
+            {{ end }}
+
+            {{ if not (.Params.hideComments | default false) }}
+            {{ partial "comments.html" . }}
+            {{ end }}
+        </div>
+
+        {{ if $showToc }}
+        <aside class="post-sidebar" data-toc-sidebar>
+            <button
+                class="toc-toggle"
+                type="button"
+                data-toc-toggle
+                aria-expanded="true"
+                aria-controls="post-toc-panel"
+                aria-label="收起目录"
+            >
+                <span class="toc-toggle__icon toc-toggle__icon--open" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M4 6l16 0" />
+                        <path d="M4 12l16 0" />
+                        <path d="M4 18l16 0" />
+                    </svg>
+                </span>
+                <span class="toc-toggle__icon toc-toggle__icon--close" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M18 6l-12 12" />
+                        <path d="M6 6l12 12" />
+                    </svg>
+                </span>
+            </button>
+            <div class="table-of-contents toc-sidebar" id="post-toc-panel" data-toc-panel>
+                <h2>
+                    {{ (.Params.TocTitle | default .Site.Params.TocTitle) | default "目录" }}
+                </h2>
+                {{ .TableOfContents }}
+            </div>
+            <div class="toc-sidebar-actions">
+                <button class="toc-back-to-top" type="button" data-toc-back-to-top aria-label="回到顶部">
+                    {{ partial "icons/arrow-to-top.html" . }}
+                </button>
+            </div>
+        </aside>
+        {{ end }}
+    </div>
+</article>
+{{ end }}

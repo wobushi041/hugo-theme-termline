@@ -1,0 +1,144 @@
+<footer class="footer">
+  <div class="footer__inner">
+    {{ if $.Site.Copyright }}
+      <div class="copyright copyright--user">
+        <span>{{ $.Site.Copyright | safeHTML }}</span>
+      </div>
+    {{ else }}
+      {{ $termline := site.Params.termline | default dict }}
+      {{ $footerCfg := $termline.footer | default dict }}
+      {{ $owner := $footerCfg.owner | default site.Title }}
+      {{ $showPoweredBy := true }}
+      {{ if isset $footerCfg "showpoweredby" }}
+        {{ $showPoweredBy = $footerCfg.showpoweredby }}
+      {{ else if isset $footerCfg "showPoweredBy" }}
+        {{ $showPoweredBy = $footerCfg.showPoweredBy }}
+      {{ end }}
+      {{ $beianCfg := $termline.beian | default dict }}
+      {{ $hasIcp := and $beianCfg.icpNumber $beianCfg.icpURL }}
+      {{ $hasPolice := and $beianCfg.policeNumber $beianCfg.policeURL }}
+      <div class="copyright">
+        <span class="copyright__meta">© {{ now.Year }} {{ $owner }}{{ if $showPoweredBy }} · Powered by <a href="https://gohugo.io">Hugo</a>{{ end }}</span>
+        {{ if or $hasIcp $hasPolice }}
+          <span class="copyright__beian">
+            {{ if $hasIcp }}
+              <a class="copyright__beian-icp" href="{{ $beianCfg.icpURL }}" target="_blank" rel="noreferrer">{{ $beianCfg.icpNumber }}</a>
+            {{ end }}
+            {{ if $hasPolice }}
+              <span class="copyright__beian-police">
+                {{ with $beianCfg.policeIcon }}
+                  <img class="copyright__beian-logo" src="{{ . | relURL }}" alt="公安备案标识" />
+                {{ end }}
+                <a href="{{ $beianCfg.policeURL }}" target="_blank" rel="noreferrer">{{ $beianCfg.policeNumber }}</a>
+              </span>
+            {{ end }}
+          </span>
+        {{ end }}
+      </div>
+    {{ end }}
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .footer .footer__inner {
+    min-height: 0 !important;
+  }
+  /*桌面端版权行和备案行的间距*/
+  .footer .copyright {
+    gap: 0 0;
+    line-height: 1.2;
+  }
+
+  .footer .copyright__meta,
+  .footer .copyright__beian {
+    width: 100%;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .footer .copyright__beian {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 8px;
+    row-gap: 2px;
+    margin: 0 auto;
+    white-space: normal;
+  }
+
+  .footer .copyright__beian-police {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .footer .copyright__beian-logo {
+    width: 18px;
+    max-width: none;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    display: inline-block;
+    vertical-align: middle;
+    overflow: visible;
+  }
+
+  @media (max-width: 640px) {
+    .footer .copyright__beian {
+      display: grid !important;
+      grid-template-rows: auto auto;
+      justify-items: center;
+      row-gap: 0 !important;
+      line-height: 1.8 !important;
+      white-space: normal !important;
+    }
+
+    .footer .copyright__beian-icp {
+      display: block !important;
+      margin: 0 !important;
+      line-height: 1.8 !important;
+      white-space: nowrap !important;
+    }
+
+    .footer .copyright__beian-police {
+      display: inline-grid !important;
+      grid-auto-flow: column;
+      align-items: center;
+      justify-content: center;
+      column-gap: 4px;
+      margin: 0 !important;
+      line-height: 1.8 !important;
+      white-space: nowrap !important;
+    }
+
+    .footer .copyright__beian-police .copyright__beian-logo {
+      display: block;
+      margin: 0;
+      vertical-align: middle;
+    }
+  }
+</style>
+
+{{ $menu := resources.Get "js/menu.js" | js.Build }}
+{{ $cp := resources.Get "js/code.js" | js.Build }}
+
+{{ $bundle := slice $menu $cp | resources.Concat "bundle.js" | resources.Minify }}
+
+<script type="text/javascript" src="{{ $bundle.RelPermalink }}"></script>
+
+{{ with resources.Get "custom/custom.js" }}
+  {{ $customScript := . | js.Build | minify | fingerprint }}
+  <script src="{{ $customScript.RelPermalink }}"></script>
+{{ end }}
+
+<!-- Extended footer section-->
+{{ partial "extended_footer.html" . }}

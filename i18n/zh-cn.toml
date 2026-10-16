@@ -1,0 +1,14 @@
+[journeysProvinceView]
+other = "省份"
+
+[journeysCityView]
+other = "城市"
+
+[journeysAll]
+other = "全部"
+
+[journeysTitle]
+other = "旅程见闻"
+
+[journeysEmpty]
+other = "暂无旅程记录"

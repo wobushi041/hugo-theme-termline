@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="{{ $.Site.Language }}" data-theme="light">
+<head>
+  {{ block "title" . }}
+    <title>{{ if .IsHome }}{{ $.Site.Title }}{{ else }}{{ $.Site.Title }} • {{ .Title }}{{ end }}</title>
+  {{ end }}
+  {{ partial "head.html" . }}
+  {{ partial "hooks/head-end.html" . }}
+</head>
+<body>
+{{ partial "hooks/body-start.html" . }}
+{{ partial "pixel-snow.html" . }}
+{{ $container := cond ($.Site.Params.FullWidthTheme | default false) "container full" (cond ($.Site.Params.CenterTheme | default false) "container center" "container") }}
+
+<div class="{{- $container -}}{{- cond ($.Site.Params.oneHeadingSize | default false) " headings--one-size" "" }}">
+
+  {{ partial "header.html" . }}
+  {{ partial "hooks/header-after.html" . }}
+  {{ partial "search-modal.html" . }}
+
+  <div class="content">
+    {{ partial "hooks/content-before.html" . }}
+    {{ block "main" . }}
+    {{ end }}
+    {{ partial "hooks/content-after.html" . }}
+  </div>
+
+  {{ block "footer" . }}
+    {{ partial "hooks/footer-before.html" . }}
+    {{ partial "footer.html" . }}
+  {{ end }}
+</div>
+
+{{ partial "hooks/body-end.html" . }}
+</body>
+</html>

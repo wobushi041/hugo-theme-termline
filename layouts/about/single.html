@@ -1,0 +1,116 @@
+{{ define "main" }}
+  {{ $heroBackground := .Params.heroBackground | default "" }}
+  {{ $avatar := .Params.avatar | default "" }}
+  {{ $profileName := .Params.profileName | default .Site.Title }}
+  {{ $motto := .Params.motto | default "" }}
+  {{ $mottos := .Params.mottos | default (slice) }}
+  {{ if and (eq (len $mottos) 0) $motto }}
+    {{ $mottos = slice $motto }}
+  {{ end }}
+  {{ $heatmapLight := .Params.heatmapLight | default (.Params.heatmap | default "") }}
+  {{ $heatmapDark := .Params.heatmapDark | default $heatmapLight }}
+
+  <article class="about-page">
+    <section class="about-hero-shell">
+      <div
+        class="about-hero__banner{{ if $heroBackground }} has-image{{ end }}"
+        {{ with $heroBackground }}style="--about-hero-image: url('{{ . | absURL }}');"{{ end }}
+      ></div>
+      <div class="about-hero__waves" aria-hidden="true">
+        <svg class="about-hero__wave" viewBox="0 24 150 28" preserveAspectRatio="none">
+          <defs>
+            <path
+              id="about-gentle-wave"
+              d="m -160,44.4 c 30,0 58,-18 87.7,-18 30.3,0 58.3,18 87.3,18 30,0 58,-18 88,-18 30,0 58,18 88,18 l 0,34.5 -351,0 z"
+            ></path>
+          </defs>
+          <g class="about-hero__parallax">
+            <use href="#about-gentle-wave" x="50" y="0"></use>
+            <use href="#about-gentle-wave" x="50" y="3"></use>
+            <use href="#about-gentle-wave" x="50" y="6"></use>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="about-card">
+      <div class="about-hero__profile">
+        {{ with (.Params.avatar | default "") }}
+          <img class="about-avatar about-hero__avatar" src="{{ . | relURL }}" alt="{{ $profileName }}">
+        {{ end }}
+        <h2 class="about-hero__name">{{ $profileName }}</h2>
+        {{ if gt (len $mottos) 0 }}
+          <p class="about-hero__motto typewriter-hero" data-about-motto></p>
+          <script type="application/json" data-about-mottos>{{ $mottos | jsonify | safeHTML }}</script>
+        {{ end }}
+        {{ partial "social-links.html" (dict "class" "about-links" "ariaLabel" "Social links" "dock" true) }}
+      </div>
+
+      {{ if or $heatmapLight $heatmapDark }}
+        <section class="about-hero__heatmap">
+          {{ with $heatmapLight }}
+            <img
+              class="about-hero__heatmap-image about-hero__heatmap-image--light"
+              src="{{ . }}"
+              alt="{{ $profileName }} contribution heatmap"
+              loading="lazy"
+            >
+          {{ end }}
+          {{ with $heatmapDark }}
+            <img
+              class="about-hero__heatmap-image about-hero__heatmap-image--dark"
+              src="{{ . }}"
+              alt="{{ $profileName }} contribution heatmap"
+              loading="lazy"
+            >
+          {{ end }}
+        </section>
+      {{ end }}
+
+      <section class="about-body post-content">
+        {{- $contentParts := split .RawContent "### 关于博客" -}}
+        {{- $anchorPattern := "(<h[1-9] id=\"([^\"]+)\".+)(</h[1-9]+>)" -}}
+        {{- $anchorReplacement := `${1}<a href="#${2}" class="hanchor" aria-label="Anchor">#</a> ${3}` -}}
+        <div>
+          {{- with (index $contentParts 0) -}}
+            {{- $.RenderString . | replaceRE $anchorPattern $anchorReplacement | safeHTML -}}
+          {{- end -}}
+
+          {{- with $.Params.techStacks -}}
+            <section class="about-tech" aria-labelledby="about-tech-title">
+              <h3 id="about-tech-title">我的技术栈<a href="#about-tech-title" class="hanchor" aria-label="Anchor">#</a></h3>
+              <div class="about-tech__marquee" aria-label="技术栈列表">
+                {{- $half := div (add (len .) 1) 2 -}}
+                {{- $rows := slice (first $half .) (after $half .) -}}
+                {{- range $rowIndex, $row := $rows -}}
+                  <div class="about-tech__row{{ if eq $rowIndex 1 }} about-tech__row--reverse{{ end }}">
+                    <div class="about-tech__track">
+                      {{- range seq 2 -}}
+                        {{- range $row -}}
+                          <article class="about-tech-card">
+                            <img class="about-tech-card__icon" src="{{ .icon }}" alt="" loading="lazy" decoding="async">
+                            <div class="about-tech-card__content">
+                              <a class="about-tech-card__name" href="{{ .href }}" target="_blank" rel="noopener noreferrer">{{ .name }}</a>
+                              <p class="about-tech-card__description">{{ .description }}</p>
+                            </div>
+                          </article>
+                        {{- end -}}
+                      {{- end -}}
+                    </div>
+                  </div>
+                {{- end -}}
+              </div>
+            </section>
+          {{- end -}}
+
+          {{- if gt (len $contentParts) 1 -}}
+            {{- $blogContent := printf "### 关于博客%s" (delimit (after 1 $contentParts) "### 关于博客") -}}
+            {{- $.RenderString $blogContent | replaceRE $anchorPattern $anchorReplacement | safeHTML -}}
+          {{- end -}}
+        </div>
+      </section>
+    </section>
+  </article>
+  <script defer src="{{ "about-motto.js" | absURL }}"></script>
+  <script defer src="{{ "about-dock.js" | absURL }}"></script>
+{{ end }}

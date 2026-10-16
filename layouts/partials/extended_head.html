@@ -1,0 +1,16 @@
+<link rel="stylesheet" href="{{ "vendor/glightbox/glightbox.min.css" | relURL }}">
+
+<script>
+  (function () {
+    var storageKey = "theme-preference";
+    var storedTheme = localStorage.getItem(storageKey);
+    document.documentElement.dataset.theme = storedTheme || "light";
+  })();
+</script>
+<script defer src="{{ "theme-toggle.js" | relURL }}"></script>
+<script defer src="{{ "search.js" | relURL }}"></script>
+<script defer src="{{ "hyper-text.js" | relURL }}"></script>
+<script defer src="{{ "pixel-snow.js" | relURL }}"></script>
+<script defer src="{{ "toc-toggle.js" | relURL }}"></script>
+<script defer src="{{ "typewriter-hero.js" | relURL }}"></script>
+<script defer src="{{ "flickering-grid.js" | relURL }}"></script>
