@@ -1,6 +1,6 @@
 +++
 title = "欢迎使用 termline 主题"
-date = "2026-01-01T00:00:00Z"
+date = "2026-01-02T00:00:00Z"
 tags = ["termline", "hugo", "theme"]
 categories = ["Guide"]
 description = "用于展示 termline 主题主要页面与可选功能的示例文章。"

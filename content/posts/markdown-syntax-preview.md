@@ -1,6 +1,6 @@
 +++
 title = "Markdown 语法与排版预览"
-date = "2026-01-02T12:00:00Z"
+date = "2026-01-01T12:00:00Z"
 tags = ["markdown", "preview"]
 categories = ["Docs"]
 description = "用于展示常见 Markdown 元素在 termline 主题下的排版效果。"

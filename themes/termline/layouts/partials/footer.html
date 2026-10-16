@@ -18,7 +18,7 @@
       {{ $hasIcp := and $beianCfg.icpNumber $beianCfg.icpURL }}
       {{ $hasPolice := and $beianCfg.policeNumber $beianCfg.policeURL }}
       <div class="copyright">
-        <span class="copyright__meta">© {{ now.Year }} {{ $owner }}{{ if $showPoweredBy }} · Powered by <a href="https://gohugo.io">Hugo</a>{{ end }}</span>
+        <span class="copyright__meta">© {{ now.Year }} {{ $owner }}{{ if $showPoweredBy }} · Theme <a href="https://github.com/wobushi041/hugo-theme-termline">termline</a> · Powered by <a href="https://gohugo.io">Hugo</a>{{ end }}</span>
         {{ if or $hasIcp $hasPolice }}
           <span class="copyright__beian">
             {{ if $hasIcp }}

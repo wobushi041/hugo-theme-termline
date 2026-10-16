@@ -1,6 +1,20 @@
 # termline
 
-`termline` is a minimal, line-driven terminal theme for [Hugo](https://gohugo.io/).
+[English](README.md) | [简体中文](README.zh-CN.md)
+
+A minimal, line-driven terminal theme for [Hugo](https://gohugo.io/).
+
+![termline screenshot](images/screenshot.png)
+
+## Features
+
+- Responsive terminal-inspired layout with light and dark color schemes
+- English and Simplified Chinese interface strings
+- Client-side search backed by Hugo's JSON home output
+- Archives, tags, post covers, pagination, and reading metadata
+- Dedicated About and journeys page templates
+- Markdown alerts, syntax highlighting, Mermaid diagrams, and image lightbox
+- Project-level CSS, JavaScript, and template hook overrides
 
 ## Requirements
 
@@ -8,40 +22,99 @@
 
 ## Installation
 
-You can install `termline` from the distribution branch or copy the theme
-directory from the development branch.
+### Git submodule
 
-### As a Git submodule
+The distributable theme lives on the `theme` branch with its files at the
+repository root:
 
 ```bash
 git submodule add -b theme https://github.com/wobushi041/hugo-theme-termline.git themes/termline
 ```
 
-The `theme` branch contains the theme files at its repository root, matching
-Hugo's expected `themes/termline` layout.
+To update it later:
 
-### Manual copy
+```bash
+git submodule update --remote --merge themes/termline
+```
 
-Download or clone the `main` branch, then copy its `themes/termline` directory
-into your Hugo site's `themes/termline` directory.
+### Manual installation
+
+Download the `theme` branch or a release archive and extract it to
+`themes/termline/` in your Hugo site.
+
+## Quick Start
+
+Enable the theme and JSON search index in your site's `hugo.toml`:
+
+```toml
+baseURL = "https://example.org/"
+title = "Example Site"
+theme = "termline"
+defaultContentLanguage = "en"
+
+[outputs]
+home = ["HTML", "RSS", "JSON"]
+
+[params]
+contentTypeName = "posts"
+showMenuItems = 6
+fullWidthTheme = false
+centerTheme = true
+autoCover = true
+showLastUpdated = false
+
+[languages]
+[languages.en]
+label = "English"
+weight = 1
+
+[languages.en.params]
+subtitle = "A minimal terminal blog"
+
+[languages.en.params.logo]
+logoText = "termline"
+logoHomeLink = "/"
+```
+
+Create a post and start Hugo:
+
+```bash
+hugo new content posts/hello.md
+hugo server
+```
 
 ## Configuration
 
-In your site's `hugo.toml`:
+### Footer
 
 ```toml
-theme = "termline"
-
 [params.termline.footer]
 showPoweredBy = true
 owner = "Example Author"
+```
 
+With `showPoweredBy = true`, the footer renders the copyright owner followed
+by `Theme termline` and `Powered by Hugo`. Set it to `false` to display only
+the copyright. A site-level `copyright` value replaces the generated footer.
+
+### Site assets
+
+Leave a value empty to omit that asset:
+
+```toml
 [params.termline.assets]
 favicon = "/favicon.ico"
 faviconSvg = "/favicon.svg"
 appleTouchIcon = "/apple-touch-icon.png"
 defaultOgImage = "/og-image.png"
+```
 
+### ICP and public security registration
+
+These optional fields are intended for sites that need mainland China filing
+links:
+
+```toml
 [params.termline.beian]
 icpNumber = ""
 icpURL = "https://beian.miit.gov.cn/"
@@ -50,15 +123,17 @@ policeURL = ""
 policeIcon = ""
 ```
 
-## Front Matter Specifications
+## Page Templates
 
-### About Page (`content/about.md`)
+### About page
+
+Create `content/about.md`:
 
 ```toml
 +++
 title = "About"
 type = "about"
-profileName = "Author"
+profileName = "Example Author"
 motto = "A minimal terminal blog."
 mottos = ["A minimal terminal blog.", "Line-driven and focused."]
 avatar = "/images/avatar.svg"
@@ -66,7 +141,12 @@ heroBackground = "/images/banner.jpg"
 +++
 ```
 
-### Archives Page (`content/archives.md`)
+The theme includes a neutral avatar template at `static/images/avatar.svg`.
+Override it by placing your own file at the same path in the Hugo project.
+
+### Archives page
+
+Create `content/archives.md`:
 
 ```toml
 +++
@@ -75,7 +155,9 @@ type = "archives"
 +++
 ```
 
-### Journeys Page (`content/journeys.md`)
+### Journeys page
+
+Create `content/journeys.md`:
 
 ```toml
 +++
@@ -89,27 +171,42 @@ cityCoordinates = {}
 +++
 ```
 
-## Customization & Hooks
+## Customization and Hooks
 
-### Resource Overrides
+Hugo gives project files precedence over theme files, so customizations can
+remain outside the theme and survive theme updates.
 
-- `assets/custom/custom.css` — Custom CSS injected after theme base styles.
-- `assets/custom/custom.js` — Custom JavaScript bundled and loaded after theme scripts.
+### CSS and JavaScript
 
-### Template Hooks
+Create either of these files in the root of your Hugo project:
 
-Override these partials in your site (`layouts/partials/hooks/*.html`):
+- `assets/custom/custom.css` — loaded after the theme styles
+- `assets/custom/custom.js` — loaded after the theme scripts
 
-1. `head-end.html` — Injected at the end of `<head>`
-2. `body-start.html` — Injected at the start of `<body>`
-3. `header-after.html` — Injected after header component
-4. `content-before.html` — Injected before main content block
-5. `content-after.html` — Injected after main content block
-6. `footer-before.html` — Injected before footer component
-7. `body-end.html` — Injected at the end of `<body>`
+### Template hooks
 
-## License & Attribution
+Override a hook by creating the matching file under
+`layouts/partials/hooks/` in your Hugo project:
 
-- Licensed under [MIT](LICENSE).
-- Derived from [Terminal](https://github.com/panr/hugo-theme-terminal) by panr.
-- See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for bundled open source notices.
+| Hook | Placement |
+| --- | --- |
+| `head-end.html` | End of `<head>` |
+| `body-start.html` | Start of `<body>` |
+| `header-after.html` | After the site header |
+| `content-before.html` | Before the main content block |
+| `content-after.html` | After the main content block |
+| `footer-before.html` | Before the site footer |
+| `body-end.html` | End of `<body>` |
+
+## Support and Contributions
+
+Use the repository issue tracker for bug reports and feature requests. Pull
+requests are welcome; please run the repository's full verification script
+before submitting theme changes.
+
+## License and Attribution
+
+`termline` is released under the [MIT License](LICENSE). It is derived in part
+from [Terminal](https://github.com/panr/hugo-theme-terminal) by panr. Bundled
+third-party components and their licenses are listed in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

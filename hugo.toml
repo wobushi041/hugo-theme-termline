@@ -28,7 +28,7 @@ showLastUpdated = false
 
 [params.termline.footer]
 showPoweredBy = true
-owner = "termline"
+owner = "wobushi041"
 
 [params.termline.assets]
 favicon = ""

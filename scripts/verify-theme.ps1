@@ -106,6 +106,7 @@ if (-not $PrepareScreenshot) {
     "LICENSE",
     "THIRD_PARTY_NOTICES.md",
     "README.md",
+    "README.zh-CN.md",
     "archetypes",
     "assets",
     "i18n/en.toml",
@@ -122,6 +123,7 @@ if (-not $PrepareScreenshot) {
   foreach ($path in @(
     "hugo.toml",
     "README.md",
+    "README.zh-CN.md",
     "LICENSE",
     ".github/workflows\build.yml",
     ".github/workflows\publish-theme.yml",
@@ -419,7 +421,10 @@ window.__termlineSmokeJs = true;
   foreach ($marker in @(
     "termline-smoke-hook",
     "--termline-smoke-css",
-    "__termlineSmokeJs"
+    "__termlineSmokeJs",
+    "Theme <a href=",
+    "hugo-theme-termline",
+    "Powered by <a href="
   )) {
     if (-not $renderedText.Contains($marker)) {
       throw "Rendered override marker missing: $marker"
