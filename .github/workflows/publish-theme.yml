@@ -24,6 +24,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: '0.163.3'
+          extended: true
+
+      - name: Verify complete theme
+        shell: pwsh
+        run: ./scripts/verify-theme.ps1
+
       - name: Publish themes/termline as branch root
         shell: bash
         run: |

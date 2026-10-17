@@ -115,6 +115,7 @@ if (-not $PrepareScreenshot) {
     "static",
     "static/images/avatar.svg",
     "images/screenshot.png",
+    "images/screenshot-dark.png",
     "images/tn.png"
   )) {
     Assert-Exists $themeRoot $path
@@ -283,6 +284,13 @@ if (-not $PrepareScreenshot) {
   )
   if ($screenshot.Width -ne 1500 -or $screenshot.Height -ne 1000) {
     throw "screenshot.png must be 1500x1000"
+  }
+
+  $darkScreenshot = Get-PngSize (
+    Join-Path $themeRoot "images/screenshot-dark.png"
+  )
+  if ($darkScreenshot.Width -ne 1500 -or $darkScreenshot.Height -ne 1000) {
+    throw "screenshot-dark.png must be 1500x1000"
   }
 
   $thumbnail = Get-PngSize (

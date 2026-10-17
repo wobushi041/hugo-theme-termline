@@ -4,7 +4,10 @@
 
 A minimal, line-driven terminal theme for [Hugo](https://gohugo.io/).
 
-![termline screenshot](images/screenshot.png)
+<p align="center">
+  <img src="images/screenshot.png" alt="termline light theme screenshot" width="49%">
+  <img src="images/screenshot-dark.png" alt="termline dark theme screenshot" width="49%">
+</p>
 
 ## Features
 
@@ -16,13 +19,49 @@ A minimal, line-driven terminal theme for [Hugo](https://gohugo.io/).
 - Markdown alerts, syntax highlighting, Mermaid diagrams, and image lightbox
 - Project-level CSS, JavaScript, and template hook overrides
 
-## Requirements
+## Getting Started
 
+Choose the path that matches your goal:
+
+- Clone `main` to preview the complete demonstration site.
+- Install `theme` when adding termline to your own Hugo site.
+
+### 1. Prepare the environment
+
+- [Git](https://git-scm.com/)
 - Hugo Extended `0.163.3` or newer
+- PowerShell 7 is recommended for the repository scripts
 
-## Installation
+Confirm that Hugo is available:
 
-### Git submodule
+```powershell
+hugo version
+```
+
+### 2. Preview the complete repository
+
+The `main` branch includes generic content, development configuration, and a
+quick-start script:
+
+```powershell
+git clone --branch main https://github.com/wobushi041/hugo-theme-termline.git
+Set-Location .\hugo-theme-termline
+.\scripts\dev.ps1
+```
+
+The script starts at `http://127.0.0.1:1313/`. If the port is occupied, it
+selects the next available port. You can also choose a starting port:
+
+```powershell
+.\scripts\dev.ps1 -Port 1414
+```
+
+`scripts/dev.ps1` exists only on `main`; the `theme` branch contains the
+installable theme files only.
+
+### 3. Install into an existing Hugo site
+
+#### Git submodule
 
 The distributable theme lives on the `theme` branch with its files at the
 repository root:
@@ -37,12 +76,12 @@ To update it later:
 git submodule update --remote --merge themes/termline
 ```
 
-### Manual installation
+#### Manual installation
 
 Download the `theme` branch or a release archive and extract it to
 `themes/termline/` in your Hugo site.
 
-## Quick Start
+### 4. Configure the site
 
 Enable the theme and JSON search index in your site's `hugo.toml`:
 
@@ -76,12 +115,27 @@ logoText = "termline"
 logoHomeLink = "/"
 ```
 
-Create a post and start Hugo:
+### 5. Create a post and start Hugo
 
 ```bash
 hugo new content posts/hello.md
 hugo server
 ```
+
+Open the local address printed in the terminal. To include draft posts, run:
+
+```bash
+hugo server --buildDrafts
+```
+
+### 6. Build the static site
+
+```bash
+hugo
+```
+
+The generated site is written to `public/` and can be deployed to any static
+hosting service.
 
 ## Configuration
 
