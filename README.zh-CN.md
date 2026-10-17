@@ -4,7 +4,10 @@
 
 一个极简、线条驱动的终端风格 [Hugo](https://gohugo.io/) 主题。
 
-![termline 主题截图](images/screenshot.png)
+<p align="center">
+  <img src="images/screenshot.png" alt="termline 浅色主题截图" width="49%">
+  <img src="images/screenshot-dark.png" alt="termline 深色主题截图" width="49%">
+</p>
 
 ## 主要特性
 
@@ -16,13 +19,47 @@
 - Markdown 警告块、代码高亮、Mermaid 图表与图片灯箱
 - 项目级 CSS、JavaScript 和模板插槽覆盖
 
-## 环境要求
+## 如何使用
 
+请根据目标选择对应方式：
+
+- 想快速体验完整示例站点，请克隆 `main` 分支。
+- 想在自己的 Hugo 站点中使用主题，请安装 `theme` 分支。
+
+### 1. 准备环境
+
+- [Git](https://git-scm.com/)
 - Hugo Extended `0.163.3` 或更高版本
+- 建议使用 PowerShell 7 运行仓库脚本
 
-## 安装
+安装完成后，可以检查 Hugo 版本：
 
-### Git submodule
+```powershell
+hugo version
+```
+
+### 2. 快速预览完整仓库
+
+`main` 分支包含通用演示内容、开发配置和快速启动脚本：
+
+```powershell
+git clone --branch main https://github.com/wobushi041/hugo-theme-termline.git
+Set-Location .\hugo-theme-termline
+.\scripts\dev.ps1
+```
+
+脚本默认从 `http://127.0.0.1:1313/` 启动。如果该端口已被占用，会自动选择后续
+可用端口。也可以手动指定起始端口：
+
+```powershell
+.\scripts\dev.ps1 -Port 1414
+```
+
+`scripts/dev.ps1` 仅存在于 `main` 分支；`theme` 分支只包含可安装的主题文件。
+
+### 3. 安装到现有 Hugo 站点
+
+#### Git submodule
 
 可发布主题位于 `theme` 分支，该分支以主题文件作为仓库根目录：
 
@@ -36,12 +73,12 @@ git submodule add -b theme https://github.com/wobushi041/hugo-theme-termline.git
 git submodule update --remote --merge themes/termline
 ```
 
-### 手动安装
+#### 手动安装
 
 下载 `theme` 分支或 Release 压缩包，将其解压到 Hugo 站点的
 `themes/termline/` 目录。
 
-## 快速开始
+### 4. 配置站点
 
 在站点的 `hugo.toml` 中启用主题和搜索所需的 JSON 索引：
 
@@ -75,12 +112,26 @@ logoText = "termline"
 logoHomeLink = "/"
 ```
 
-创建文章并启动 Hugo：
+### 5. 创建文章并启动 Hugo
 
 ```bash
 hugo new content posts/hello.md
 hugo server
 ```
+
+打开终端输出中的本地地址即可预览。如果文章仍为草稿，可以使用：
+
+```bash
+hugo server --buildDrafts
+```
+
+### 6. 生成静态站点
+
+```bash
+hugo
+```
+
+生成结果位于 `public/`，可以部署到任意静态网站托管平台。
 
 ## 配置
 
